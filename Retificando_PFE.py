@@ -103,20 +103,20 @@ if uploaded_file is not None:
         st.dataframe(df[['KC', 'TN1', 'TN2', 'fatc', 'kch', 'kce', 'CPFEJ', 'CPFEZ1', 'Bp1', 'Bp2', 'fp1', 'fp2', 'PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2', '%Un','FJ', 'FZ', 'Perda_Total_Predito', 'Perda_Total_Ensaio']])
 
 
-st.subheader("2.1. Análise Agrupada por Material")
-agrupado = df.groupby('Material').agg({
-            'Potência': list,
-            'PFEJ': 'mean',
-            'PFEZ1': 'mean',
-            'PFEp1': 'mean',
-            'PFEp2': 'mean'
-            }).reset_index()
+        st.subheader("2.1. Análise Agrupada por Material")
+        agrupado = df.groupby('Material').agg({
+                    'Potência': list,
+                    'PFEJ': 'mean',
+                    'PFEZ1': 'mean',
+                    'PFEp1': 'mean',
+                    'PFEp2': 'mean'
+                    }).reset_index()
 
-agrupado['Min_Potencia'] = agrupado['Potência'].apply(min)
-agrupado['Max_Potencia'] = agrupado['Potência'].apply(max)
+        agrupado['Min_Potencia'] = agrupado['Potência'].apply(min)
+        agrupado['Max_Potencia'] = agrupado['Potência'].apply(max)
 
-st.write("Dados Agrupados:")
-st.dataframe(agrupado)
+        st.write("Dados Agrupados:")
+        st.dataframe(agrupado)
 
             # **4. Detecção de Anomalias**
 st.header("3. Detecção de Anomalias")
