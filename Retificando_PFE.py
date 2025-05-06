@@ -224,12 +224,6 @@ if uploaded_file is not None:
     df['PFEp2'] = (df['d2'] * df['FZ'] * df['V10']) * ((df['a'] * (df['fp2'] / 50) +
     (1 - df['a']) * (df['fp2'] / 50) ** 2)) * ((df['Bp2'] ** 2) * df['GZ2'])
 
-    # df['CPFEJ'] = df['FJ'] * (df['KC'] ** 2)  
-    # df['PFEJ'] = df['CPFEJ'] * (df['BJ1'] ** 2) * df['GJ1']
-    # df['PFEZ1'] = df['FZ'] * (df['KC'] ** 2) * ((df['BZ1'] ** 2)) * df['GZ1']
-    # df['PFEp1'] = df['FZ'] * df['V10'] * ((df['BZ1'] ** 2)) * df['GZ1']
-    # df['PFEp2'] = df['FZ'] * df['V10'] * ((df['BZ2'] ** 2)) * df['GZ2']
-
     PFEJ = df['PFEJ'].mean()
     PFEZ1 = df['PFEZ1'].mean()
     PFEp1 = df['PFEp1'].mean()
@@ -258,24 +252,7 @@ if st.button("Click"):
 
     fig_PFEp2 = px.histogram(df, x='PFEp2', nbins=20, title="Distribuição das Perdas no dente rotor pulsação com amortecimento da gaiola (PFEp2)")
     st.plotly_chart(fig_PFEp2, use_container_width=True)
-
-    # Gráfico de dispersão
-    fig_disp = px.scatter(df, x='Potência', y='PFEJ', color='Material',
-                              title="PFEJ vs Potência")
-    st.plotly_chart(fig_disp, use_container_width=True)
-
-    fig_disp = px.scatter(df, x='Potência', y='PFEZ1', color='Material',
-                              title="PFEZ1 vs Potência")
-    st.plotly_chart(fig_disp, use_container_width=True)
-
-    fig_disp = px.scatter(df, x='Potência', y='PFEp1', color='Material',
-                              title="PFEp1 vs Potência")
-    st.plotly_chart(fig_disp, use_container_width=True)
-
-    fig_disp = px.scatter(df, x='Potência', y='PFEp2', color='Material',
-                              title="PFEp2 vs Potência")
-    st.plotly_chart(fig_disp, use_container_width=True)
-
+    
     # Correlações
     st.subheader("Mapa de Correlações")
     numerical_df = agrupado.select_dtypes(include=['number'])
