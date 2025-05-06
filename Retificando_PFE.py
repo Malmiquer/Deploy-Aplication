@@ -235,11 +235,8 @@ if st.button("Click"):
     perdas_totais = motor.calcular_perdas_ferro()
     causas = motor.causas_perdas_ferro()
 
-
     # **5. Visualizações Gráficas**
     st.header("5. Visualizações Gráficas")
-
-    # Histogramas com Plotly 'PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2'
    
     fig_PFEJ = px.histogram(df, x='PFEJ', nbins=20, title="Distribuição das Perdas na coroa estator (PFEJ)")
     st.plotly_chart(fig_PFEJ, use_container_width=True)
@@ -259,43 +256,6 @@ if st.button("Click"):
     fig_corr, ax = plt.subplots(figsize=(12, 8))
     sns.heatmap(numerical_df.corr(), annot=True, cmap="coolwarm", fmt=".2f", ax=ax)
     st.pyplot(fig_corr)
-
-####   PROPHET   #######
-#     # Upload de arquivo
-#     st.sidebar.title("Upload de Dados")
-#     uploaded_file = st.sidebar.file_uploader("Carregar arquivo", type=["xlsx","csv"])
-
-#     # Verificar se um arquivo foi carregado
-# if uploaded_file is not None:
-#     #Carregar o arquivo excel
-#     df = pd.read_excel(uploaded_file)
-#     # Preparar dados para Prophet
-#     df_pred = df.rename(columns={'Perda_Ensaio': 'y', 'DATE': 'ds'})
-#     df_pred['ds'] = pd.to_datetime(df_pred['ds'], errors='coerce')
-#     df_pred = df_pred[['ds', 'y']].dropna()
-
-#         # Treinar modelo
-#     modelo = Prophet()
-
-#     modelo.fit(df_pred)
-
-#     # Fazer previsões
-#     # Criar dataframe futuro
-#     periods = st.sidebar.slider("Número de períodos para previsão", 1, 24, 12)  # Slider interativo
-#     future = modelo.make_future_dataframe(periods=periods)
-#     previsao = modelo.predict(future)
-
-#     #Exibir gráfico de previsão
-#     fig_forecast = modelo.plot(previsao)
-#     st.pyplot(fig_forecast)
-
-#     st.subheader("Previsão")
-#     st.dataframe(previsao[['ds', 'yhat', 'yhat_lower', 'yhat_upper']])
-
-#     # Plotar componentes da previsão
-#     st.subheader("Componentes da Previsão")
-#     st.plotly_chart(plot_components_plotly(modelo, previsao))
-
 
     # **7. Download do Arquivo Processado**
     st.header("Baixar Dados Processados")
