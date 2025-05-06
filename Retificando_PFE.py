@@ -97,10 +97,12 @@ if uploaded_file is not None:
 
         df['Perda_Total_Predito'] = df['PFEJ'] + df['PFEZ1'] + df['PFEp1'] + (df['PFEp2'] * df ['d2'])
         df['Perda_Total_Ensaio'] = df['Pfe com fator'] + df['Pfe sem fator'] + df['Perda_Ensaio'] + df['Perda_Newton'] + df['Perda Newton com fator']
+        df['Desvio_Padrão1'] = df['Perda_Total_Predito'] / df['Perda_Total_Ensaio']
+        df['Desvio_Padrão2'] = df['Perda_Total_Ensaio'] / df['Perda_Total_Predito']
 
         # Exibir cálculos
         st.write("Resultados dos cálculos:")
-        st.dataframe(df[['KC', 'TN1', 'TN2', 'fatc', 'kch', 'kce', 'CPFEJ', 'CPFEZ1', 'Bp1', 'Bp2', 'fp1', 'fp2', 'PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2', '%Un','FJ', 'FZ', 'Perda_Total_Predito', 'Perda_Total_Ensaio']])
+        st.dataframe(df[['KC', 'TN1', 'TN2', 'fatc', 'kch', 'kce', 'CPFEJ', 'CPFEZ1', 'Bp1', 'Bp2', 'fp1', 'fp2', 'PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2', '%Un','FJ', 'FZ', 'Perda_Total_Predito', 'Perda_Total_Ensaio', 'Desvio_Padrão1', 'Desvio_Padrão2']])
 
 
         st.subheader("2.1. Análise Agrupada por Material")
@@ -119,7 +121,7 @@ if uploaded_file is not None:
         st.dataframe(agrupado)
 
             # **4. Detecção de Anomalias**
-st.header("3. Detecção de Anomalias")
+    st.header("3. Detecção de Anomalias")
 
         # Função para criar a coluna com a presença de máquinas com anomalias
 def detecta(potencias, min_val, max_val, PFEJ, PFEZ1, PFEp1, PFEp2):
@@ -133,26 +135,26 @@ def detecta(potencias, min_val, max_val, PFEJ, PFEZ1, PFEp1, PFEp2):
             
         # Função para criar a coluna com a presença de máquinas com anomalias
             # Aplicando a função para criar a coluna 'Flag_anomalia'
-agrupado['Flag_anomalia'] = agrupado.apply(
-        lambda row: detecta(row['Potência'], row['Min_Potencia'], row['Max_Potencia'], row['PFEJ'], row['PFEZ1'],  row['PFEp1'],  row['PFEp2']),
-        axis=1
-        )
+            agrupado['Flag_anomalia'] = agrupado.apply(
+                    lambda row: detecta(row['Potência'], row['Min_Potencia'], row['Max_Potencia'], row['PFEJ'], row['PFEZ1'],  row['PFEp1'],  row['PFEp2']),
+                    axis=1
+                    )
 
 # Visualizar os resultados
-st.write("Resultados da Detecção de Anomalias:")
-st.dataframe(agrupado[['Material', 'Potência', 'Min_Potencia', 'Max_Potencia', 'PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2', 'Flag_anomalia']])
+            st.write("Resultados da Detecção de Anomalias:")
+            st.dataframe(agrupado[['Material', 'Potência', 'Min_Potencia', 'Max_Potencia', 'PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2', 'Flag_anomalia']])
 
             # Modelo de isolamento
-model = IsolationForest(n_estimators=50, contamination=0.1)
-model.fit(agrupado[['PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2']])
+            model = IsolationForest(n_estimators=50, contamination=0.1)
+            model.fit(agrupado[['PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2']])
 
-agrupado['scores'] = model.decision_function(agrupado[['PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2']])
-agrupado['anomaly'] = model.predict(agrupado[['PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2']])
+            agrupado['scores'] = model.decision_function(agrupado[['PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2']])
+            agrupado['anomaly'] = model.predict(agrupado[['PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2']])
 
-print(agrupado.head(20))
+            print(agrupado.head(20))
 
-st.write("Resultados da Detecção de Anomalias:")
-st.dataframe(agrupado[['Material', 'scores', 'anomaly']])
+            st.write("Resultados da Detecção de Anomalias:")
+            st.dataframe(agrupado[['Material', 'scores', 'anomaly']])
 
 # Definindo a classe MotorInducao
 class MotorInducao:
@@ -168,7 +170,7 @@ class MotorInducao:
         self.d2 = d2
 
     def calcular_perdas_ferro(self):
-        perdas_totais = self.PFEJ + self.PFEZ1 * d2 + self.PFEp1 + self.PFEp2 
+        perdas_totais = self.PFEJ + self.PFEZ1 * self.d2 + self.PFEp1 + self.PFEp2 
         st.subheader("Cálculo de Perdas Totais no Ferro")
         st.write(f"Perdas Totais de Ferro, em Vazio: {perdas_totais:.2f} W")
         return perdas_totais
@@ -188,10 +190,10 @@ class MotorInducao:
             st.write(causa)
         return causas
 
-# # Interface do Streamlit
-#     st.header("4. Análise de Perdas em Motores de Indução")
-#     st.sidebar.subheader("Parâmetros do Motor")
-    # Entrada de dados do usuário
+# Interface do Streamlit
+    st.header("4. Análise de Perdas em Motores de Indução")
+    st.sidebar.subheader("Parâmetros do Motor")
+                # Entrada de dados do usuário
 voltage = st.sidebar.number_input("Tensão (V):", min_value=0, step=10)
 current = st.sidebar.number_input("Corrente (A):", min_value=0.0, step=0.5)
 Potência = st.sidebar.number_input("Potência (W):", min_value=0, step=1)
@@ -207,12 +209,26 @@ d2 = st.sidebar.number_input("d2:", min_value=0.0, step=0.5)
 # Criar instância do motor com os dados fornecidos
 motor = MotorInducao(voltage, current, frequency, fator, PFEp1, PFEp2, PFEJ, PFEZ1, d2)
 if uploaded_file is not None:
-    # Certifique-se de que o cálculo das perdas foi realizado antes de usar as variáveis
-    df['CPFEJ'] = df['FJ'] * (df['KC'] ** 2)  # Exemplo: cálculo hipotético
+    
+    df['CPFEJ'] = df['FJ'] * (df['KC'] ** 2) * (
+            (df['kch'] * df['V10'] * df['a'] * (df['Frequency'] / 50)) +
+            (df['kce'] * df['V10'] * (1 - df['a']) * (df['Frequency'] / 50) ** 2)
+        )
     df['PFEJ'] = df['CPFEJ'] * (df['BJ1'] ** 2) * df['GJ1']
-    df['PFEZ1'] = df['FZ'] * (df['KC'] ** 2) * ((df['BZ1'] ** 2)) * df['GZ1']
-    df['PFEp1'] = df['FZ'] * df['V10'] * ((df['BZ1'] ** 2)) * df['GZ1']
-    df['PFEp2'] = df['FZ'] * df['V10'] * ((df['BZ2'] ** 2)) * df['GZ2']
+
+    df['PFEZ1'] = df['CPFEZ1'] * (df['BZ1'] ** 2) * df['GZ1']
+
+    df['PFEp1'] = df['FZ'] * df['V10'] * ((df['a'] * (df['fp1'] / 50) +
+    (1 - df['a']) * (df['fp1'] / 50) ** 2)) * (df['Bp1'] ** 2) * df['GZ1']
+    
+    df['PFEp2'] = (df['d2'] * df['FZ'] * df['V10']) * ((df['a'] * (df['fp2'] / 50) +
+    (1 - df['a']) * (df['fp2'] / 50) ** 2)) * ((df['Bp2'] ** 2) * df['GZ2'])
+
+    # df['CPFEJ'] = df['FJ'] * (df['KC'] ** 2)  
+    # df['PFEJ'] = df['CPFEJ'] * (df['BJ1'] ** 2) * df['GJ1']
+    # df['PFEZ1'] = df['FZ'] * (df['KC'] ** 2) * ((df['BZ1'] ** 2)) * df['GZ1']
+    # df['PFEp1'] = df['FZ'] * df['V10'] * ((df['BZ1'] ** 2)) * df['GZ1']
+    # df['PFEp2'] = df['FZ'] * df['V10'] * ((df['BZ2'] ** 2)) * df['GZ2']
 
     PFEJ = df['PFEJ'].mean()
     PFEZ1 = df['PFEZ1'].mean()
@@ -231,16 +247,16 @@ if st.button("Click"):
 
     # Histogramas com Plotly 'PFEJ', 'PFEZ1', 'PFEp1', 'PFEp2'
    
-    fig_PFEJ = px.histogram(df, x='PFEJ', nbins=20, title="Distribuição das Perdas na coroa estator")
+    fig_PFEJ = px.histogram(df, x='PFEJ', nbins=20, title="Distribuição das Perdas na coroa estator (PFEJ)")
     st.plotly_chart(fig_PFEJ, use_container_width=True)
 
-    fig_PFEZ1 = px.histogram(df, x='PFEZ1', nbins=20, title="Distribuição das Perdas no dente estator fluxo principal")
+    fig_PFEZ1 = px.histogram(df, x='PFEZ1', nbins=20, title="Distribuição das Perdas no dente estator fluxo principal (PFEZ1)")
     st.plotly_chart(fig_PFEZ1, use_container_width=True)
     
-    fig_PFEp1 = px.histogram(df, x='PFEp1', nbins=20, title="Distribuição das Perdas no dente estator pulsacao")
+    fig_PFEp1 = px.histogram(df, x='PFEp1', nbins=20, title="Distribuição das Perdas no dente estator pulsacao (PFEp1)")
     st.plotly_chart(fig_PFEp1, use_container_width=True)
 
-    fig_PFEp2 = px.histogram(df, x='PFEp2', nbins=20, title="Distribuição das Perdas no dente rotor pulsação com amortecimento da gaiola")
+    fig_PFEp2 = px.histogram(df, x='PFEp2', nbins=20, title="Distribuição das Perdas no dente rotor pulsação com amortecimento da gaiola (PFEp2)")
     st.plotly_chart(fig_PFEp2, use_container_width=True)
 
     # Gráfico de dispersão
@@ -268,40 +284,40 @@ if st.button("Click"):
     st.pyplot(fig_corr)
 
 ####   PROPHET   #######
-    # Upload de arquivo
-    st.sidebar.title("Upload de Dados")
-    uploaded_file = st.sidebar.file_uploader("Carregar arquivo", type=["xlsx","csv"])
+#     # Upload de arquivo
+#     st.sidebar.title("Upload de Dados")
+#     uploaded_file = st.sidebar.file_uploader("Carregar arquivo", type=["xlsx","csv"])
 
-    # Verificar se um arquivo foi carregado
-if uploaded_file is not None:
-    #Carregar o arquivo excel
-    df = pd.read_excel(uploaded_file)
-    # Preparar dados para Prophet
-    df_pred = df.rename(columns={'Perda_Ensaio': 'y', 'DATE': 'ds'})
-    df_pred['ds'] = pd.to_datetime(df_pred['ds'], errors='coerce')
-    df_pred = df_pred[['ds', 'y']].dropna()
+#     # Verificar se um arquivo foi carregado
+# if uploaded_file is not None:
+#     #Carregar o arquivo excel
+#     df = pd.read_excel(uploaded_file)
+#     # Preparar dados para Prophet
+#     df_pred = df.rename(columns={'Perda_Ensaio': 'y', 'DATE': 'ds'})
+#     df_pred['ds'] = pd.to_datetime(df_pred['ds'], errors='coerce')
+#     df_pred = df_pred[['ds', 'y']].dropna()
 
-        # Treinar modelo
-    modelo = Prophet()
+#         # Treinar modelo
+#     modelo = Prophet()
 
-    modelo.fit(df_pred)
+#     modelo.fit(df_pred)
 
-    # Fazer previsões
-    # Criar dataframe futuro
-    periods = st.sidebar.slider("Número de períodos para previsão", 1, 24, 12)  # Slider interativo
-    future = modelo.make_future_dataframe(periods=periods)
-    previsao = modelo.predict(future)
+#     # Fazer previsões
+#     # Criar dataframe futuro
+#     periods = st.sidebar.slider("Número de períodos para previsão", 1, 24, 12)  # Slider interativo
+#     future = modelo.make_future_dataframe(periods=periods)
+#     previsao = modelo.predict(future)
 
-    #Exibir gráfico de previsão
-    fig_forecast = modelo.plot(previsao)
-    st.pyplot(fig_forecast)
+#     #Exibir gráfico de previsão
+#     fig_forecast = modelo.plot(previsao)
+#     st.pyplot(fig_forecast)
 
-    st.subheader("Previsão")
-    st.dataframe(previsao[['ds', 'yhat', 'yhat_lower', 'yhat_upper']])
+#     st.subheader("Previsão")
+#     st.dataframe(previsao[['ds', 'yhat', 'yhat_lower', 'yhat_upper']])
 
-    # Plotar componentes da previsão
-    st.subheader("Componentes da Previsão")
-    st.plotly_chart(plot_components_plotly(modelo, previsao))
+#     # Plotar componentes da previsão
+#     st.subheader("Componentes da Previsão")
+#     st.plotly_chart(plot_components_plotly(modelo, previsao))
 
 
     # **7. Download do Arquivo Processado**
@@ -317,113 +333,113 @@ else:
     st.info("Por favor, carregue um arquivo Excel para começar.")
 
 ### METODO KNN ###
-st.header("7. Regressão KNN")
-st.write("Este aplicativo utiliza o algoritmo de Regressão KNN com ajuste de hiperparâmetros.")
+    st.header("7. Regressão KNN")
+    st.write("Este aplicativo utiliza o algoritmo de Regressão KNN com ajuste de hiperparâmetros.")
 
-default_test_size = st.sidebar.slider("Test Size", 0.1, 0.5, 0.2)
-seed = st.sidebar.number_input("Random State Seed", min_value=0, value=42)
+    default_test_size = st.sidebar.slider("Test Size", 0.1, 0.5, 0.2)
+    seed = st.sidebar.number_input("Random State Seed", min_value=0, value=42)
 
-# Simulação de dados
-st.sidebar.subheader("Generate Data")
-a = np.random.rand(1000) * 100
-b = 3 * a + np.random.normal(0, 10, 1000)
+    # Simulação de dados
+    st.sidebar.subheader("Generate Data")
+    a = np.random.rand(1000) * 100
+    b = 3 * a + np.random.normal(0, 10, 1000)
 
-# Divisão dos dados
-a_train, a_test, b_train, b_test = train_test_split(a, b, test_size=default_test_size, random_state=seed)
+    # Divisão dos dados
+    a_train, a_test, b_train, b_test = train_test_split(a, b, test_size=default_test_size, random_state=seed)
 
-# Pipeline
-pipe = Pipeline([
-    ('scaler', StandardScaler()),
-    ('regressor', KNeighborsRegressor())
-])
+    # Pipeline
+    pipe = Pipeline([
+        ('scaler', StandardScaler()),
+        ('regressor', KNeighborsRegressor())
+    ])
 
-# Hiperparâmetros
-hyperparameters = {
-    'regressor__n_neighbors': [2, 3, 5, 10],
-    'regressor__weights': ['uniform', 'distance'],
-    'regressor__algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute']
-}
+    # Hiperparâmetros
+    hyperparameters = {
+        'regressor__n_neighbors': [2, 3, 5, 10],
+        'regressor__weights': ['uniform', 'distance'],
+        'regressor__algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute']
+    }
 
-# GridSearchCV
-grid_search = GridSearchCV(
-    pipe,
-    param_grid=hyperparameters,
-    return_train_score=True,
-    scoring='neg_root_mean_squared_error',
-    n_jobs=-2,
-    cv=5
-)
-# Ajustando modelo
-a_train_reshaped = a_train.reshape(-1, 1)
-grid_search.fit(a_train_reshaped, b_train)
+    # GridSearchCV
+    grid_search = GridSearchCV(
+        pipe,
+        param_grid=hyperparameters,
+        return_train_score=True,
+        scoring='neg_root_mean_squared_error',
+        n_jobs=-2,
+        cv=5
+    )
+    # Ajustando modelo
+    a_train_reshaped = a_train.reshape(-1, 1)
+    grid_search.fit(a_train_reshaped, b_train)
 
-# Melhores hiperparâmetros
-cv_best_params = grid_search.best_params_
-st.write("Best Hyperparameters")
-st.write(cv_best_params)
+    # Melhores hiperparâmetros
+    cv_best_params = grid_search.best_params_
+    st.write("Best Hyperparameters")
+    st.write(cv_best_params)
 
-# Configurando o pipeline com melhores parâmetros
-pipe.set_params(**cv_best_params)
-pipe.fit(a_train_reshaped, b_train)
+    # Configurando o pipeline com melhores parâmetros
+    pipe.set_params(**cv_best_params)
+    pipe.fit(a_train_reshaped, b_train)
 
-# Previsões
-b_test_pred = pipe.predict(a_test.reshape(-1, 1))
+    # Previsões
+    b_test_pred = pipe.predict(a_test.reshape(-1, 1))
 
-# Métricas
-rmse_test = math.sqrt(mean_squared_error(b_test, b_test_pred))
-mae_test = mean_absolute_error(b_test, b_test_pred)
-mape_test = mean_absolute_percentage_error(b_test, b_test_pred)
-r2_test = r2_score(b_test, b_test_pred)
+    # Métricas
+    rmse_test = math.sqrt(mean_squared_error(b_test, b_test_pred))
+    mae_test = mean_absolute_error(b_test, b_test_pred)
+    mape_test = mean_absolute_percentage_error(b_test, b_test_pred)
+    r2_test = r2_score(b_test, b_test_pred)
 
-df_metricas = pd.DataFrame(data={
-    'RSME': [rmse_test],
-    'MAE': [mae_test],
-    'MAPE': [mape_test],
-    'R²': [r2_test]
-})
-st.write("Metrics")
-st.table(df_metricas)
-# Comparação de dados reais e previstos
-b_pred = pd.DataFrame(data=pipe.predict(a_test.reshape(-1, 1)), columns=['Predicted Values'])
-b_real = pd.DataFrame(data=b_test, columns=['Real Values'])
-df_comparison = pd.concat([b_real, b_pred], axis=1)
-df_comparison.columns = ['Real_Data', 'Predicted_Value']
-df_comparison['Percentage_difference'] = 100 * (df_comparison['Predicted_Value'] - df_comparison['Real_Data']) / df_comparison['Real_Data']
-df_comparison['Average'] = df_comparison['Real_Data'].mean()
-df_comparison['Q1'] = df_comparison['Real_Data'].quantile(0.25)
-df_comparison['Q3'] = df_comparison['Real_Data'].quantile(0.75)
-df_comparison['USL'] = df_comparison['Real_Data'].mean() + 2 * df_comparison['Real_Data'].std()
-df_comparison['LSL'] = df_comparison['Real_Data'].mean() - 2 * df_comparison['Real_Data'].std()
+    df_metricas = pd.DataFrame(data={
+        'RSME': [rmse_test],
+        'MAE': [mae_test],
+        'MAPE': [mape_test],
+        'R²': [r2_test]
+    })
+    st.write("Metrics")
+    st.table(df_metricas)
+    # Comparação de dados reais e previstos
+    b_pred = pd.DataFrame(data=pipe.predict(a_test.reshape(-1, 1)), columns=['Predicted Values'])
+    b_real = pd.DataFrame(data=b_test, columns=['Real Values'])
+    df_comparison = pd.concat([b_real, b_pred], axis=1)
+    df_comparison.columns = ['Real_Data', 'Predicted_Value']
+    df_comparison['Percentage_difference'] = 100 * (df_comparison['Predicted_Value'] - df_comparison['Real_Data']) / df_comparison['Real_Data']
+    df_comparison['Average'] = df_comparison['Real_Data'].mean()
+    df_comparison['Q1'] = df_comparison['Real_Data'].quantile(0.25)
+    df_comparison['Q3'] = df_comparison['Real_Data'].quantile(0.75)
+    df_comparison['USL'] = df_comparison['Real_Data'].mean() + 2 * df_comparison['Real_Data'].std()
+    df_comparison['LSL'] = df_comparison['Real_Data'].mean() - 2 * df_comparison['Real_Data'].std()
 
-st.write("### Real vs Predicted Comparison")
-st.dataframe(df_comparison)
+    st.write("### Real vs Predicted Comparison")
+    st.dataframe(df_comparison)
 
-# Gráficos
-st.write("### Plots")
+    # Gráficos
+    st.write("### Plots")
 
-# Gráfico 1: Valores reais vs previstos
-fig, ax = plt.subplots(figsize=(25, 10))
-ax.set_title('Real Value vs Predicted Value', fontsize=25)
-ax.plot(df_comparison.index, df_comparison['Real_Data'], label='Real', marker='D', markersize=10, linewidth=0)
-ax.plot(df_comparison.index, df_comparison['Predicted_Value'], label='Predicted', c='r', linewidth=1.5)
-ax.plot(df_comparison.index, df_comparison['Average'], label='Mean', linestyle='dashed', c='yellow')
-ax.plot(df_comparison.index, df_comparison['Q1'], label='Q1', linestyle='dashed', c='g')
-ax.plot(df_comparison.index, df_comparison['Q3'], label='Q3', linestyle='dashed', c='g')
-ax.plot(df_comparison.index, df_comparison['USL'], label='USL', linestyle='dashed', c='r')
-ax.plot(df_comparison.index, df_comparison['LSL'], label='LSL', linestyle='dashed', c='r')
-ax.legend(fontsize=25)
-ax.tick_params(axis='both', which='major', labelsize=20)
-st.pyplot(fig)
+    # Gráfico 1: Valores reais vs previstos
+    fig, ax = plt.subplots(figsize=(25, 10))
+    ax.set_title('Real Value vs Predicted Value', fontsize=25)
+    ax.plot(df_comparison.index, df_comparison['Real_Data'], label='Real', marker='D', markersize=10, linewidth=0)
+    ax.plot(df_comparison.index, df_comparison['Predicted_Value'], label='Predicted', c='r', linewidth=1.5)
+    ax.plot(df_comparison.index, df_comparison['Average'], label='Mean', linestyle='dashed', c='yellow')
+    ax.plot(df_comparison.index, df_comparison['Q1'], label='Q1', linestyle='dashed', c='g')
+    ax.plot(df_comparison.index, df_comparison['Q3'], label='Q3', linestyle='dashed', c='g')
+    ax.plot(df_comparison.index, df_comparison['USL'], label='USL', linestyle='dashed', c='r')
+    ax.plot(df_comparison.index, df_comparison['LSL'], label='LSL', linestyle='dashed', c='r')
+    ax.legend(fontsize=25)
+    ax.tick_params(axis='both', which='major', labelsize=20)
+    st.pyplot(fig)
 
-# Gráfico 2: Dispersão entre real e previsto
-fig, ax = plt.subplots(figsize=(25, 10))
-ax.set_title('Real Value vs Predicted Value (Scatter)', fontsize=25)
-ax.scatter(df_comparison['Real_Data'], df_comparison['Predicted_Value'], s=100)
-ax.plot(df_comparison['Real_Data'], df_comparison['Real_Data'], c='r')
-ax.set_xlabel('Real', fontsize=25)
-ax.set_ylabel('Predicted', fontsize=25)
-ax.tick_params(axis='both', which='major', labelsize=20)
-st.pyplot(fig) 
+    # Gráfico 2: Dispersão entre real e previsto
+    fig, ax = plt.subplots(figsize=(25, 10))
+    ax.set_title('Real Value vs Predicted Value (Scatter)', fontsize=25)
+    ax.scatter(df_comparison['Real_Data'], df_comparison['Predicted_Value'], s=100)
+    ax.plot(df_comparison['Real_Data'], df_comparison['Real_Data'], c='r')
+    ax.set_xlabel('Real', fontsize=25)
+    ax.set_ylabel('Predicted', fontsize=25)
+    ax.tick_params(axis='both', which='major', labelsize=20)
+    st.pyplot(fig) 
 
 
 
@@ -494,11 +510,11 @@ fatc = \frac{De - Di}{Di}
 $$
 ### Fórmula de  kch
 $$
-Kch = 2.71828^{0.019.Polos^2.fatc^{1.5}}
+Kch = e^{0.019.Polos^2.fatc^{1.5}}
 $$
 ### Fórmula de kce
 $$
-Kce = 2.71828^{0.1.Polos^1.8.fatc^{1.4}}
+Kce = e^{0.1.Polos^1.8.fatc^{1.4}}
 $$
 ### Fórmula de CPFEJ
 $$
